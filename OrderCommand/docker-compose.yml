@@ -1,20 +1,16 @@
 version: '3.1'
 services:
-  postgres:
-    image: postgres:latest
-    container_name: postgresql
+  mysql-server:
+    image: mysql:8.0.25
+    platform: linux/amd64
+    container_name: mysql-server
     environment:
-      POSTGRES_PASSWORD: admin
-      POSTGRES_USER: admin
-      POSTGRES_DB: order-management
-    volumes:
-      - ./postgres:/data/postgres
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=order-management
+      - MYSQL_PASSWORD=root
     ports:
-      - 5432:5432
-    command:
-      - "postgres"
-      - "-c"
-      - "wal_level=logical"
+      - "3306:3306"
+      - "33060:33060"
   zookeeper:
     image: confluentinc/cp-zookeeper
     ports:
@@ -23,9 +19,10 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
   kafka:
     image: confluentinc/cp-kafka
+    container_name: kafka
     depends_on:
       - zookeeper
-      - postgres
+      - mysql-server
     ports:
       - "9092:9092"
     environment:
@@ -36,6 +33,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_MIN_INSYNC_REPLICAS: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_GROUP_ID: my_connector_group
 
   kafka-ui:
     image: provectuslabs/kafka-ui
@@ -53,11 +51,11 @@ services:
     ports:
       - "8083:8083"
     environment:
-      GROUP_ID: 1
+      GROUP_ID: my_connector_group
       CONFIG_STORAGE_TOPIC: my_connect_configs
       OFFSET_STORAGE_TOPIC: my_connect_offsets
       BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       - zookeeper
-      - postgres
+      - mysql-server
       - kafka

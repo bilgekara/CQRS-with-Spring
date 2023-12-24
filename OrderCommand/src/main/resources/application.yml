@@ -3,17 +3,17 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/order-management
-    username: admin
-    password: admin
-  properties:
-    hibernate:
-      dialect: org.hibernate.dialect.PostgreSQL9Dialect
+    url: jdbc:mysql://localhost:3306/order-management
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: create-drop
     open-in-view: false
     show-sql: true
     properties:
-      hibernate.format_sql: true
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
+        format_sql: true
 
